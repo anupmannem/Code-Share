@@ -2,9 +2,15 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 
-router.get('/login', function(req, res, next) {
-	res.render('login', {title: 'Login to your account'});
-});
+router.route('/login')
+	.get(function(req, res, next) {
+		res.render('login', {title: 'Login to your account'});
+	})
+	.post(passport.authenticate('local', {
+		failureRedirect: '/login'
+	}), function(req, res) {
+		res.redirect('/');
+	});
 
 router.route('/register')
 	.get(function(req, res, next) {
@@ -38,5 +44,17 @@ router.route('/register')
 			})		
 		}
 	});
+
+router.get('/logout', function(req, res) {
+	req.logout();
+	res.redirect('/');
+});
+
+router.get('/auth/facebook', passport.authenticate('facebook', {scope: 'email'}));
+
+router.get('/auth/facebook/callback', passport.authenticate('facebook', {
+	successRedirect: '/', 
+	failureRedirect: '/'
+}));
 
 module.exports = router;
