@@ -15,7 +15,7 @@
 				</div>
 				<div class="card-body">
 					<ul class="media-list" style="height: 200px; overflow-y: scroll" id="chatbox-listMessages">
-						
+						<div id="displayChat"></div>
 					</ul>
 				</div>
 				<div class="card-footer">
@@ -52,7 +52,7 @@
 		theme: "monokai"
 	});
 	
-	var code = $('#code-screen').val();
+	var code = document.getElementById('code-screen').innerText;
 	var cmClient;
 	function init(str, revision, clients, serverAdapter) {
 		if (!code) {
@@ -87,11 +87,16 @@
 	var sendMessage = function() {
 		var userMessage = $('#userMessage').val();
 		socket.emit('chatMessage', {message: userMessage, username: username});
+		console.log(userMessage.innerText);
 		$('#userMessage').val("");
 	};
 	
 	socket.on('chatMessage', function(data) {
-		$('#chatbox-listMessages').append(userMessage(data.username, data.message));
+		//$('#chatbox-listMessages').append(userMessage(data.username, data.message));
+		var chatMessages = document.getElementById('chatbox-listMessages');
+		var displayChat = document.createElement('span');
+		displayChat.innerHTML = userMessage(data.username, data.message);		
+		chatMessages.appendChild(displayChat);
 	})
 	
 </script>
