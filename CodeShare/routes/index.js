@@ -54,8 +54,6 @@ router.route('/contact')
 					title: 'code-share: a platform for sharing code.'
 				})
 			})
-			
-			
 		}
 	});
 
