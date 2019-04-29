@@ -51,6 +51,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.46.0/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.46.0/mode/javascript/javascript.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.14/peer.js"></script>
 
 <script src="/plugins/ot/ot.js"></script>
 <script src="/socket.io/socket.io.js"></script>
@@ -115,4 +116,71 @@
 		chatMessages.appendChild(displayChat);
 	})
 	
+	// peerjs
+	// compatibility
+	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+	// peerjs object
+	var peer = new Peer(username + roomId);
+	peer.on('open', function() {
+		$('#my-id').text(peer.id);
+	});
+	
+	// receiving a call
+	peer.on('call', function(call) {
+		call.answer(window.localStream);
+		step3(call);
+	});
+	peer.on('error', function(err) {
+		alert(err.message);
+		step2();	// return to step2 if errors
+	})
+	// click handlers setup
+	$(function() {
+		$('#make-call').click(function() {
+			var call = peer.call($('#callto-id').val(), window.localStream);
+			step3(call);
+		});
+		$('#end-call').click(function() {
+			window.existingCall.close();
+			step2();
+		});
+		// retry if getUserMedia fails
+		$('#step1-retry').click(function() {
+			$('#step1-error').hide();
+			step1();
+		})
+		// get things started
+		step1();
+	});
+	
+	function step1() {
+		navigator.getUserMedia({audio: true, video: true}, function(stream) {
+			// set your video displays
+			$('my-video').prop('src', URL.createObjectURL(stream));
+			window.localStream = stream;
+			step2();
+		}, function() { $('step1-error').show(); });
+	}
+	
+	function step2() {
+		$('#step1, #step3').hide();
+		$('#step2').show();
+	}
+	
+	function step3(call) {
+		// hang up on an existing call if present
+		if (window.existingCall) {
+			window.existingCall.close();
+		}
+		// wait for stream on the call, then set peer video display
+		call.on('stream', function(stream) {
+			$('#second-video').prop('src', URL.createObjectURL(stream));
+		});
+		// UI stuff
+		window.existingCall = call;
+		$('#second-id').text(call.peer);
+		call.on('close', step2);
+		$('#step1, #step2').hide();
+		$('#step3').show();
+	}
 </script>
