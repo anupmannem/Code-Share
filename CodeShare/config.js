@@ -1,3 +1,10 @@
+require('dotenv').config()
+
+dbuser = process.env.USERNAME
+dbpassword = process.env.PASSWORD
+domain = process.env.DOMAIN
+db = process.env.DB
+
 module.exports = {
 	mailer: {
 		service: 'Gmail',
@@ -6,6 +13,6 @@ module.exports = {
 			password: 'demodemodemo'
 		},		
 	},
-	dbConnstring: 'mongodb://127.0.0.1:27017/codeshare',
+	dbConnstring: 'mongodb://dbuser:dbpassword@domain/db',
 	sessionKey: 'HaloCodeShare'
 }
